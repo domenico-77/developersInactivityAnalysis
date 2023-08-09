@@ -15,7 +15,7 @@ git log --pretty=format:"%H-;-%aN-;-%aE-;-%at-;-%cN-;-%cE-;-%ct-;-%f"  > commiti
 
 #Extract and format commit files information
 git log --name-status --pretty=format:"commit	%H" --find-renames > log.log
-awk -F$'\t' -f $currentpath/log.awk log.log > commitfileinfo.log
+awk -F$'\t' -f $currentpath/developersInactivityAnalysis/TruckFactor/log.awk log.log > commitfileinfo.log
 
 #Get current file list
 git ls-files > filelist.log
