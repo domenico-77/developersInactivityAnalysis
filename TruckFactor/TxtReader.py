@@ -132,12 +132,14 @@ def extract_stats_TF_developers(owner: str):
     TF_report_content = TF_report_reader(owner)
     TF_devs_stats =[]
     row_exceeded = False
+    i = 1
     for row in TF_report_content:
         row = row.strip()
         if not row_exceeded:
             if row == ROW_AFTER_TF_DEVS:
                 row_exceeded = True
         else:
+            prit(str(i))
             TF_row = row.split(';')
             TF_stats = {
                 'Developer': TF_row[0],
@@ -145,6 +147,7 @@ def extract_stats_TF_developers(owner: str):
                 'Percentage': TF_row[2]
             }
             TF_devs_stats.append(TF_stats)
+            i += 1
     
     TF_devs_stats.pop(-1)
     return TF_devs_stats
