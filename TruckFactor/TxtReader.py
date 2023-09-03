@@ -40,7 +40,7 @@ def get_path_TF_report(owner: str):
         path(str): the path to the TF_report file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + FILE_TF_REPORT.format(owner)
+    path = path_folder + '/' + FILE_TF_REPORT
     return path
 
 def get_paht_unmasking_results(owner: str):
@@ -52,7 +52,7 @@ def get_paht_unmasking_results(owner: str):
         path(str): the path to the unmasking_results file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + FILE_UNMASKING_RESULTS.format(owner)
+    path = path_folder + '/' + FILE_UNMASKING_RESULTS
     return path
 
 def get_path_TF_devs(owner: str):
@@ -64,7 +64,7 @@ def get_path_TF_devs(owner: str):
         path(str): the path to the TF_devs file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + TF_DEVS.format(owner)
+    path = path_folder + '/' + TF_DEVS
     return path
 
 
@@ -77,7 +77,7 @@ def get_path_TF_devs_names(owner: str):
         path(str): the path to the TF_devs_names file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + TF_DEVS_NAMES.format(owner)
+    path = path_folder + '/' + TF_DEVS_NAMES
     return path
     
 
