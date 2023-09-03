@@ -251,7 +251,7 @@ def create_TF_devs(owner: str):
     Args:
         owner(str): the name of the owner of the repository whose file we want to generate TF_devs
     """
-    file_path = get_path_TF_devs()
+    file_path = get_path_TF_devs(owner)
     tf_devs = create_list_tf_devs(owner)
     try:
         with open(file_path, 'w', newline='') as file:
