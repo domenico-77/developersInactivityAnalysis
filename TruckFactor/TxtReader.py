@@ -139,17 +139,16 @@ def extract_stats_TF_developers(owner: str):
             if row == ROW_AFTER_TF_DEVS:
                 row_exceeded = True
         else:
-            print(str(i))
-            TF_row = row.split(';')
-            TF_stats = {
-                'Developer': TF_row[0],
-                'Files': TF_row[1],
-                'Percentage': TF_row[2]
-            }
-            TF_devs_stats.append(TF_stats)
-            i += 1
+            if row != '':
+                TF_row = row.split(';')
+                TF_stats = {
+                    'Developer': TF_row[0],
+                    'Files': TF_row[1],
+                    'Percentage': TF_row[2]
+                }
+                TF_devs_stats.append(TF_stats)
     
-    TF_devs_stats.pop(-1)
+    #TF_devs_stats.pop(-1)
     return TF_devs_stats
 
 def create_TF_devs_names(owner: str):
