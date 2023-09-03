@@ -4,11 +4,12 @@ import csv
 
 #CONSTANT
 ROW_AFTER_TF_DEVS = 'TF authors (Developer;Files;Percentage):'
-FILE_TF_REPORT = 'Organization/{}/TF_report.txt'
-FOLDER_NAME = 'developersInactivityMetric'
-FILE_UNMASKING_RESULTS = 'Organization/{}/unmasking_results.csv'
-TF_DEVS = 'Organization/{}/TF_devs.csv'
-TF_DEVS_NAMES = 'Organization/{}/TF_devs_names.csv'
+FILE_TF_REPORT = 'output/TF_report.txt'
+FOLDER_NAME = 'repoDiProva'
+FOLDER_ANALYSIS = 'developersInactivityAnalysis'
+FILE_UNMASKING_RESULTS = 'output/unmasking_results.csv'
+TF_DEVS = 'output/TF_devs.csv'
+TF_DEVS_NAMES = 'output/TF_devs_names.csv'
 
 def get_path_to_folder():
     """
@@ -20,13 +21,13 @@ def get_path_to_folder():
     list_folder = path_to_folder.split('/')
     path = '/'
     for elem in list_folder:
-        if elem != FOLDER_NAME:
+        if elem != FOLDER_ANALYSIS:
             if path == '/':
                 path = path + elem
             else:
                 path = path + '/'+ elem
         else:
-            path = path + '/' + elem
+            path = path + '/' + FOLDER_NAME
             break
     return path
 
