@@ -139,7 +139,7 @@ def extract_stats_TF_developers(owner: str):
             if row == ROW_AFTER_TF_DEVS:
                 row_exceeded = True
         else:
-            prit(str(i))
+            print(str(i))
             TF_row = row.split(';')
             TF_stats = {
                 'Developer': TF_row[0],
