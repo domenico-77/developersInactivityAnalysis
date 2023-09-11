@@ -2,7 +2,7 @@ import os
 import pandas
 
 import sys
-sys.path.insert(1, '../')
+sys.path.insert(1, 'developersInactivityAnalysis')
 import Utilities as util
 import Settings as cfg
 
