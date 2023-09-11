@@ -9,7 +9,7 @@ import os, sys, logging, pandas, csv
 from datetime import datetime
 
 ### IMPORT CUSTOM MODULES
-sys.path.insert(1, '../')
+sys.path.insert(1, 'developersInactivityAnalysis')
 import Settings as cfg
 import Utilities as util
 
