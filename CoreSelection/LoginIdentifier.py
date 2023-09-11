@@ -2,7 +2,7 @@ import sys, os
 import pandas
 from github import Github
 
-sys.path.insert(1, '../')
+sys.path.insert(1, 'developersInactivityAnalysis')
 import Utilities as util
 
 ### MAIN FUNCTION
