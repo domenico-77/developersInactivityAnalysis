@@ -53,7 +53,7 @@ def get_path_to_dev_replacements(dev_gone):
     path = path_folder + '/' + DEV_REPLECEMENTS.format(dev_gone)
     return path
 
-def get_path_commit_list(repository: str):
+def get_path_commit_list(owner: str, repository: str):
     """
     Returns the path to the commit_list.csv file
     Args:
@@ -62,10 +62,10 @@ def get_path_commit_list(repository: str):
         path(str): the path to the commit_list file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + COMMIT_LIST.format(repository)
+    path = path_folder + '/' + COMMIT_LIST.format(owner, repository)
     return path
 
-def get_path_devs_login_list(repository: str):
+def get_path_devs_login_list():
     """
     Returns the path to the devs_login_list.csv file
     Args:
@@ -74,10 +74,10 @@ def get_path_devs_login_list(repository: str):
         path(str): the path to the devs_login_list file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + DEVS_LOGIN_LIST.format(repository)
+    path = path_folder + '/' + DEVS_LOGIN_LIST
     return path
 
-def get_path_c_devs_login_list(repository: str):
+def get_path_c_devs_login_list():
     """
     Returns the path to the c_devs_login_list.csv file
     Args:
@@ -86,10 +86,10 @@ def get_path_c_devs_login_list(repository: str):
         path(str): the path to the c_devs_login_list file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + C_DEVS_LOGIN_LIST.format(repository)
+    path = path_folder + '/' + C_DEVS_LOGIN_LIST
     return path
 
-def get_path_devs_stats(repository: str):
+def get_path_devs_stats():
     """
     Returns the path to the devs_stats.csv file
     Args:
@@ -98,7 +98,7 @@ def get_path_devs_stats(repository: str):
         path(str): the path to the devs_stats file
     """
     path_folder = get_path_to_folder()
-    path = path_folder + '/' + DEVS_STATS.format(repository)
+    path = path_folder + '/' + DEVS_STATS
     return path
 
 def convert_string_to_date(date_string, date_format = "%Y-%m-%d"):
