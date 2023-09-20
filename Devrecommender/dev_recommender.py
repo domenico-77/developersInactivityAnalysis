@@ -124,7 +124,7 @@ class Dev_recomender:
         self.__owner = owner
         self.__repository = repository
         self.__token = token
-        exist = os.path.isfile(get_path_devs_stats(repository))
+        exist = os.path.isfile(get_path_devs_stats())
         if not exist:
             print("the devs_stats data set does not exist")
             self.calculate_devs_stats_list()
@@ -148,7 +148,7 @@ class Dev_recomender:
             'author', login of the dev who committed;  
             'date', the date the commit was made in the format yyyy-mm-dd
         """
-        path = get_path_commit_list(self.__repository)
+        path = get_path_commit_list(self.__owner, self.__repository)
         commit_list = []
         with open(path, 'r', newline= '') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=';')
@@ -303,7 +303,7 @@ class Dev_recomender:
         if it does not exist it generates the login_list 
         and saves the devs_login_list.csv file
         """
-        path_list = get_path_devs_login_list(self.__repository)
+        path_list = get_path_devs_login_list()
         exist = os.path.isfile(path_list)
         if not exist:
             print("The devs_login_list.csv file is missing")
@@ -320,7 +320,7 @@ class Dev_recomender:
         Output:
             devs_login_list(list): the list contains the logins of all the developers of the repository
         """
-        path_list = get_path_devs_login_list(self.__repository)
+        path_list = get_path_devs_login_list()
         self.__save_devs_login_list()
         with open(path_list, mode='r') as file:
             content = file.readlines()
@@ -332,7 +332,7 @@ class Dev_recomender:
         """
         The function creates a copy of the devs_login_list file and saves the copy to the c_devs_login_list file
         """
-        path_c_devs_login_list = get_path_c_devs_login_list(self.__repository)
+        path_c_devs_login_list = get_path_c_devs_login_list()
         exist = os.path.isfile(path_c_devs_login_list)
         if not exist:
             devs_login_list = self.read_devs_login_list()
@@ -347,7 +347,7 @@ class Dev_recomender:
         Output:
             devs_login_list(list): the list contains the logins of all the developers of the repository
         """
-        path_file = get_path_c_devs_login_list(self.__repository)
+        path_file = get_path_c_devs_login_list()
         self.__create_copy_devs_login_list()
         with open(path_file, mode='r') as file:
             content = file.readlines()
@@ -363,7 +363,7 @@ class Dev_recomender:
         Args:
             c_devs_login_devs(list): The list of developer logins that are missing from the statistics calculation
         """
-        path_file = get_path_c_devs_login_list(self.__repository)
+        path_file = get_path_c_devs_login_list()
         with open(path_file, mode= 'w') as file:
             for dev_login in c_devs_login_devs:
                 file.write(f"{dev_login}\n")
@@ -375,7 +375,7 @@ class Dev_recomender:
         Args:
             devs_stats(list): the list containing the statistics of the developers whose statistics we have finished calculating
         """
-        path_file = get_path_devs_stats(self.__repository)
+        path_file = get_path_devs_stats()
         exist = os.path.isfile(path_file)
         if not exist:
             with open(path_file, 'w') as new_file:
@@ -393,7 +393,7 @@ class Dev_recomender:
             'dev': dev login
             for each file we have a 'file_name' key: number of commits made by the developer on the file
         """
-        path_file = get_path_devs_stats(self.__repository)
+        path_file = get_path_devs_stats()
         with open(path_file, mode='r') as file:
             lines = file.readlines()
         
