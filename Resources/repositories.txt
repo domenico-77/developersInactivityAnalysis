@@ -1,1 +1,1 @@
-github/linguist
+github-linguist/linguist
