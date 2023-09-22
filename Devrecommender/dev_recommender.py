@@ -462,8 +462,6 @@ class Dev_recomender:
         length_normalization_f = self.length_normalization(first_dev)
         length_normalization_s = self.length_normalization(second_dev)
         cosine_similarity = scalar_product/(length_normalization_f * length_normalization_s)
-        print("decimal places" +str(decimal_places)+"tipo"+ str(type(decimal_places)))
-        print("cosine similarity" +str(cosine_similarity)+"tipo"+ str(type(cosine_similarity)))
         return round(cosine_similarity, decimal_places)
     
     def recomender(self, login_dev, k, decimal_places):
