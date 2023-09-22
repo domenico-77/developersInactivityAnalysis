@@ -613,10 +613,13 @@ class Dev_recomender:
         path_replacement = get_path_to_dev_replacements(dev_gone)
         fieldname = ['dev', 'cosine_similarity']
         with open(path_replacement, mode= 'w', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=fieldname)
-            writer.writeheader()
-            print(str(classification))
-            writer.writerows(classification)
+            if classification:
+                writer = csv.DictWriter(file, fieldnames=fieldname)
+                writer.writeheader()
+                writer.writerows(classification)
+            else:
+                writer = csv.writer(file)
+                writer.writerow(["There is no data needed to find replacements for the developer" + str(dev_gone)])
     
     def recomender_substitutes(self, k, decimal_places):
         devs_gone = self.read_developers_gone()
