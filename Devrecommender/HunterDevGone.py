@@ -52,7 +52,7 @@ def read_G_full_list():
         with open(path, mode='r', newline='') as file:
             reader = csv.DictReader(file, delimiter=';')  
             for row_readed in reader:
-                if row_readed['repo'] == 'github/linguist':
+                if row_readed['repo'] == 'atom/atom':
                     row = {
                         'dev': row_readed['dev'],
                         'label': row_readed['label'],
