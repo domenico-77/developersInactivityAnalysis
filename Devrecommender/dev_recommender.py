@@ -615,6 +615,7 @@ class Dev_recomender:
         with open(path_replacement, mode= 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=fieldname)
             writer.writeheader()
+            print(str(classification))
             writer.writerows(classification)
     
     def recomender_substitutes(self, k, decimal_places):
