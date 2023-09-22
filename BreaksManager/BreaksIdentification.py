@@ -138,7 +138,7 @@ def main(repos_list, mode):
             output_folder = os.path.join(workingFolder, organization, cfg.breaks_folder_name, mode.upper())
             os.makedirs(output_folder, exist_ok=True)
 
-            breaks_df.to_csv(os.path.join(output_folder, dev + '_breaks.csv'),
+            breaks_df.to_csv(os.path.join(output_folder, str(dev) + '_breaks.csv'),
                              sep=cfg.CSV_separator, na_rep=cfg.CSV_missing, index=False, quoting=None, line_terminator='\n')
 
 if __name__ == "__main__":
