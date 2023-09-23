@@ -9,13 +9,13 @@
 import os, sys
 import pandas
 
-sys.path.insert(1, 'developersInactivityAnalysis')
+sys.path.insert(1, '../')
 import BreaksManager.BreaksLabeling as BL
 
 from datetime import datetime
 import datetime as dt
 
-sys.path.insert(1, '../')
+sys.path.insert(1, 'developersInactivityAnalysis')
 import Utilities as util
 import Settings as cfg
 
