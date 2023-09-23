@@ -168,7 +168,7 @@ if __name__ == "__main__":
     mode = 'A80API'
     repos_list = util.getReposList()
 
-    workingDir = os.path.join(cfg.main_folder)
+    workingDir = os.path.join(cfg.main_folder_ExtremeCasesAnalysis)
     BreaksList = pandas.DataFrame(columns=['dev', 'repo', 'dates', 'len', 'Tfov'])
     NClist = pandas.DataFrame(columns=['dev', 'repo', 'dates', 'len', 'Tfov', 'previously', 'label', 'after'])
     Ilist = pandas.DataFrame(columns=['dev', 'repo', 'dates', 'len', 'Tfov', 'previously', 'label', 'after'])
