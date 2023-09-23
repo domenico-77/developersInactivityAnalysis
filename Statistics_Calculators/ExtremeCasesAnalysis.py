@@ -9,7 +9,7 @@
 import os, sys
 import pandas
 
-sys.path.insert(1, 'developersInactivityAnalysis/BreaksManager')
+sys.path.insert(1, 'developersInactivityAnalysis')
 import BreaksManager.BreaksLabeling as BL
 
 from datetime import datetime
