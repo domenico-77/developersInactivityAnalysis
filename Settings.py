@@ -5,7 +5,8 @@ tokens_file = "../Resources/tokens.txt"  # The relative path of the file contain
 ### Extraction Settings
 data_collection_date = "2020-01-15"  # The max date to consider for the commits and activities extraction
 repos_file = "Resources/repositories.txt"  # The relative path of the file containing the list of the repos <organization/repo>
-main_folder = "../Organizations"  # The main folder where results will be archived
+#main_folder = "../Organizations"  # The main folder where results will be archived developersInactivityAnalysis
+main_folder = "developersInactivityAnalysis/Organizations"
 logs_folder = "../logs"  # The folder where the logs will be archived
 
 supported_modes = ['tf', 'a80', 'a80mod', 'a80api']
