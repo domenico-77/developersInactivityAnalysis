@@ -620,7 +620,7 @@ class Dev_recomender:
         return basis_iff_calculation
     
     def read_developers_gone(self):
-        path_devs_gone = get_path_devs_gone(self.__repository)
+        path_devs_gone = get_path_devs_gone()
         devs_gone = []
         with open(path_devs_gone, mode='r', newline='') as file:
             content = file.readlines()
@@ -668,21 +668,7 @@ class Dev_recomender:
         
         return devs_stats
 
-    def prova(self):
-        commit_list = self.__read_commit_list()
-        devs = set()
-        for commit in commit_list:
-            devs.add(commit['author'])
-        
-
-        devs_login = set(self.read_devs_login_list())
-
-        devs_non = devs | devs_login
-
-        for elem in devs_non:
-            print(elem)
-        
-        print("Lunghezza = " + str(len(devs_non)))
+  
         
 
 
