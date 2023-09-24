@@ -16,6 +16,7 @@ C_DEVS_LOGIN_LIST = 'output/c_devs_login_list.csv'
 DEVS_STATS = 'output/devs_stats.csv'
 REPLACEMENTS = 'output/replacements'
 DEV_REPLECEMENTS = '{}_replacements.csv'
+DEVS_GONE = 'output/devs_gone.csv'
 
 
 def get_path_to_folder():
@@ -112,6 +113,11 @@ def convert_string_to_date(date_string, date_format = "%Y-%m-%d"):
     """
     date = datetime.strptime(date_string, date_format).date()
     return date
+
+def get_path_devs_gone():
+    path_main_folder = get_path_to_folder()
+    path = path_main_folder + '/' + DEVS_GONE
+    return path
 
 class Dev_recomender:
     def __init__(self, owner, repository, token):
