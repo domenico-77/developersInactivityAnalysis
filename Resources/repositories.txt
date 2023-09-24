@@ -1,1 +1,1 @@
-github-linguist/linguist
+JabRef/jabref
