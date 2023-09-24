@@ -131,7 +131,7 @@ def read_pauses_dates_list():
 
     return lista_pause_dev
 
-def devs_gone():
+def get_devs_gone():
     lista_pause_dev = read_pauses_dates_list()
     lista_devs = read_G_full_list()
     devs_gone = set()  
@@ -157,7 +157,7 @@ def save_devs_gone(devs_gone):
             writer.writerow([name])
 
 def calculate_and_save_devs_gone():
-    devs_gone = devs_gone()
+    devs_gone = get_devs_gone()
     save_devs_gone(devs_gone)
 
 
