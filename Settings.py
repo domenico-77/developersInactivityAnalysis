@@ -1,9 +1,12 @@
+import datetime
 ### GitHub Settings
 items_per_page = 100  # The number of results in each page of the GitHub results. Max: 100
 tokens_file = "../Resources/tokens.txt"  # The relative path of the file containing the list of the github tokens
 
 ### Extraction Settings
-data_collection_date = "2020-01-15"  # The max date to consider for the commits and activities extraction
+today = datetime.date.today()
+first_day_of_month = str(today.replace(day=1))
+data_collection_date = first_day_of_month  # The max date to consider for the commits and activities extraction
 repos_file = "Resources/repositories.txt"  # The relative path of the file containing the list of the repos <organization/repo>
 main_folder = "../Organizations"  # The main folder where results will be archived developersInactivityAnalysis
 main_folder_ExtremeCasesAnalysis = "developersInactivityAnalysis/Organizations"
