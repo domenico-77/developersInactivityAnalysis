@@ -548,7 +548,8 @@ class Dev_recomender:
             keys = set(devs_stats[i])
             keys.discard('dev')
             for key in keys:
-                devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))*self.__iff_calculation[key]
+               # devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))*self.__iff_calculation[key]
+                devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))
         
         return devs_stats
 
