@@ -8,6 +8,8 @@ FOLDER_NAME = 'repoDiProva'
 G_FULL_LIST = 'output/G_full_list.csv'
 PAUSES_DATE_LIST = 'output/pauses_dates_list.csv'
 DEVS_GONE = 'output/devs_gone.csv'
+TF_DEVS = 'output/TF_devs.csv
+A80_DEVS = 'output/A80_devs.csv'
 
 def get_path_to_folder():
     """
@@ -42,6 +44,15 @@ def get_path_pauses_dates_list():
 def get_path_devs_gone():
     path_main_folder = get_path_to_folder()
     path = path_main_folder + '/' + DEVS_GONE
+    return path
+def get_path_TF_devs():
+    path_main_folder = get_path_to_folder()
+    path = path_main_folder + '/' + TF_DEVS
+    return path
+
+def get_path_A80_devs():
+    path_main_folder = get_path_to_folder()
+    path = path_main_folder + '/' + A80_DEVS
     return path
 
 def read_G_full_list():
@@ -158,7 +169,42 @@ def save_devs_gone(devs_gone):
 
 def calculate_and_save_devs_gone():
     devs_gone = get_devs_gone()
+    TF_devs = read_TF_devs(repo)
+    core_devs = read_A80_devs(repo)
+    TF_devs = set(TF_devs)
+    core_devs = set(core_devs)
+    main_devs = TF_devs | core_devs
+    devs_gone = devs_gone.intersection(main_devs)
     save_devs_gone(devs_gone)
+
+def read_TF_devs():
+    file_path = get_path_TF_devs()
+    TF_devs_login = []
+    with open(file_path, mode='r', newline='') as file:
+        reader = csv.reader(file, delimiter=';')
+        first = True
+        for row in reader:
+            if not first:
+                TF_devs_login.append(row[1])
+            else:
+                first = False
+    
+    return TF_devs_login
+
+def read_A80_devs():
+    file_path = get_path_A80_devs()
+    core_devs_login = []
+    with open(file_path, mode= 'r', newline='') as file:
+        reader = csv.reader(file, delimiter=';')
+        first = True
+        for row in reader:
+            if not first:
+                core_devs_login.append(row[0])
+            else:
+                first = False
+        
+    return core_devs_login
+
 
 
 if __name__ == "__main__":
