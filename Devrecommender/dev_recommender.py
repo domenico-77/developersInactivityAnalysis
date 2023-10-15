@@ -140,7 +140,7 @@ class Dev_recomender:
                 self.calculate_devs_stats_list()
         
         self.__iff_calculation = self.calculate_iff_for_each_file()
-        self.__devs_stats_cf_iff = self.edit_devs_stats_with_cf_iff()
+        self.__devs_stats_cf_iff = self.edit_devs_stats_with_cf_iff(False)
         
 
 
@@ -539,7 +539,7 @@ class Dev_recomender:
         else:
             return 1
     
-    def edit_devs_stats_with_cf_iff(self):
+    def edit_devs_stats_with_cf_iff(self, do: bool):
         """
         the function normalizes the values of the developer statistics according to the cf_iff
         """
@@ -547,9 +547,19 @@ class Dev_recomender:
         for i in range(0, len(devs_stats)):
             keys = set(devs_stats[i])
             keys.discard('dev')
+            total_LOC = 0
             for key in keys:
-               # devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))*self.__iff_calculation[key]
-                devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))
+                total_LOC += devs_stats[i][key]
+                if do:
+                    devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))*self.__iff_calculation[key]
+                else:
+                    devs_stats[i][key] = (1 + math.log10(devs_stats[i][key]))
+            modified_files = int(len(keys))
+            if modified_files > 0:
+                devs_stats[i]['modified_files'] = 1 + math.log10(modified_files)
+
+            if total_LOC > 0:
+                devs_stats[i]['total_LOC'] = 1 + math.log10(total_LOC)
         
         return devs_stats
 
