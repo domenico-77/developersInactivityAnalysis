@@ -1,0 +1,77 @@
+name: Runner ExtremeCasesAnalysis
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner BreaksLabeling"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+        
+    - name: Setup directory
+      run: |
+        mkdir -p developersInactivityAnalysis/Organizations
+        mkdir -p developersInactivityAnalysis/Organizations/A80API
+        cp -r output/${{ vars.OWNER }} developersInactivityAnalysis/Organizations
+        mkdir -p developersInactivityAnalysis/Organizations${{ vars.OWNER }}/Dev_Breaks
+        cp -r output/${{ vars.OWNER }}/Dev_Breaks/A80API developersInactivityAnalysis/Organizations${{ vars.OWNER }}/Dev_Breaks
+        
+        if [ -e "developersInactivityAnalysis/Organizations${{ vars.OWNER }}/Dev_Breaks/A80API" ]; then
+            echo "Il percorso esiste."
+          else
+            echo "Il percorso non esiste."
+          fi
+
+    - name: Run Python script ExtremeCasesAnalysis.py
+      run: python3 developersInactivityAnalysis/Statistics_Calculators/ExtremeCasesAnalysis.py
+
+        
+    - name: Move CSV file to main repository
+      run: | 
+           rm -r output/${{ vars.OWNER }}
+           mv developersInactivityAnalysis/Organizations/A80API/G_full_list.csv output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output
+
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine ExtremeCasesAnalysis, salvataggio di ${{ vars.OWNER }} in output"
+        git push

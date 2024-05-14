@@ -1,0 +1,95 @@
+name: Runner PullRequestsExtractor
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner BreaksIdentification"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Controlla se ci sono esecuzioni in corso di PullRequestsExtractor e recupera i file
+      run: | 
+        mkdir -p developersInactivityAnalysis/logs
+        mkdir -p developersInactivityAnalysis/Organizations
+          
+        if [ -f "appoggio/Activities_Extraction_${{ vars.OWNER }}.log" ]; then
+           echo "C'è già un esecuzione in corso, recupero i file..."
+           mv appoggio/Activities_Extraction_${{ vars.OWNER }}.log developersInactivityAnalysis/logs
+           mv appoggio/${{ vars.OWNER }} developersInactivityAnalysis/Organizations
+        else 
+           echo "Questa è la prima esecuzione."
+           cp -r output/${{ vars.OWNER }} developersInactivityAnalysis/Organizations         
+        fi
+
+    - name: Run Python script PullRequestsExtractor.py
+      env:
+         MY_SECRET: ${{ secrets.TOKEN }}
+      run: python3 developersInactivityAnalysis/Extractors/PullRequestsExtractor.py ${{ vars.OWNER }}/${{ vars.REPO }} $MY_SECRET
+      timeout-minutes: 340
+      
+    - name: Salva i dati temporanei nella cartella di appoggio
+      if: ${{ failure() }} #si avvia solo se quello di prima è stato interrotto
+      run: |  
+        mv developersInactivityAnalysis/logs/Activities_Extraction_${{ vars.OWNER }}.log appoggio
+        mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} appoggio
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git add appoggio
+        git commit -m "Aggiunti appoggio/${{ vars.OWER }} e appoggio/Activities_Extraction_${{ vars.OWNER }}.log"
+        git push
+
+
+    - name: Move CSV file to main repository
+      run: |
+         rm -r output/${{ vars.OWNER }}
+         if [ -f "output/Activities_Extraction_${{ vars.OWNER }}.log" ]; then
+           rm output/Activities_Extraction_${{ vars.OWNER }}.log
+           mv developersInactivityAnalysis/logs/Activities_Extraction_${{ vars.OWNER }}.log output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output       
+         else
+           mv developersInactivityAnalysis/logs/Activities_Extraction_${{ vars.OWNER }}.log output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output
+         fi
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine estrazione, salvataggio di Activities_Extraction_${{ vars.OWNER }}.log e /${{ vars.OWNER }} in output"
+        git push

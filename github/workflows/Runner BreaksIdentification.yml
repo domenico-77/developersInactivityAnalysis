@@ -1,0 +1,102 @@
+name: Runner BreaksIdentification
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner TxtReader"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set file and directory for run
+      run: | 
+        mkdir -p developersInactivityAnalysis/Organizations
+        mkdir -p developersInactivityAnalysis/logs
+        
+        mkdir -p developersInactivityAnalysis/TF_Results/${{ vars.REPO }}
+        mkdir -p developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        mkdir -p developersInactivityAnalysis/A80MOD_Results/${{ vars.REPO }}
+        mkdir -p developersInactivityAnalysis/A80API_Results/${{ vars.REPO }}
+            
+        cp -r output/${{ vars.OWNER }} developersInactivityAnalysis/Organizations
+        mkdir -p developersInactivityAnalysis/Organizations/${{ vars.OWNER }}/Dev_Breaks
+        
+        cp output/TF_devs.csv developersInactivityAnalysis/TF_Results/${{ vars.REPO }}
+        cp output/A80_devs.csv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        cp output/A80mod_devs.csv developersInactivityAnalysis/A80MOD_Results/${{ vars.REPO }}
+        cp output/A80api_devs.csv developersInactivityAnalysis/A80API_Results/${{ vars.REPO }}
+        
+        
+        if [ -f "output/Breaks_Identification_${{ vars.OWNER }}.log" ]; then
+           echo "Ci sono state altre esecuzioni, recupero i file..."
+           mv output/Breaks_Identification_${{ vars.OWNER }}.log developersInactivityAnalysis/logs         
+        else
+           echo "Questa è la prima esecuzione."
+        fi
+
+    - name: Run Python script BreaksIdentification.py with tf param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksIdentification.py tf
+        
+    - name: Run Python script BreaksIdentification.py with a80 param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksIdentification.py a80
+        
+    - name: Run Python script BreaksIdentification.py with a80mod param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksIdentification.py a80mod
+        
+    - name: Run Python script BreaksIdentification.py with a80api param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksIdentification.py a80api
+
+        
+    - name: Move CSV file to main repository
+      run: | 
+        rm -r output/${{ vars.OWNER }}
+        if [ -f "output/Breaks_Identification_${{ vars.OWNER }}.log" ]; then
+           rm output/Breaks_Identification_${{ vars.OWNER }}.log
+           mv developersInactivityAnalysis/logs/Breaks_Identification_${{ vars.OWNER }}.log output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output
+        else
+           mv developersInactivityAnalysis/logs/Breaks_Identification_${{ vars.OWNER }}.log output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output
+        fi
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine BreaksIdentification, salvataggio di /${{ vars.OWNER }} e Breaks_Identification_${{ vars.OWNER }}.log in output"
+        git push

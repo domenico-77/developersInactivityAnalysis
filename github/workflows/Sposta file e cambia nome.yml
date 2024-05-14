@@ -1,0 +1,32 @@
+name: Sposta file e cambia nome
+
+on:
+  workflow_dispatch:
+
+jobs:
+  move-and-rename:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out il repository
+      uses: actions/checkout@v2
+
+    - name: Sposta e rinomina il file
+      run: |
+        # Sostituisci questi valori con i tuoi percorsi e nomi di file desiderati
+        ORIG_PATH=output/${{ vars.OWNER }}
+        DEST_PATH=output
+        OLD_FILE_NAME=coding_pauses_dates.csv
+        NEW_FILE_NAME=pauses_dates_list.csv
+
+        mv "$ORIG_PATH/$OLD_FILE_NAME" "$DEST_PATH/$NEW_FILE_NAME"
+      working-directory: ${{ github.workspace }}
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine"
+        git push

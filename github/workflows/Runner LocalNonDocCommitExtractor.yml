@@ -1,0 +1,99 @@
+name: Runner LocalNonDocCommitExtractor
+
+on:
+  workflow_dispatch:
+ # schedule:
+    # Esegui l'azione ogni primo giorno del mese alle 00:00
+ #   - cron: '0 0 1 * *'
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    
+        
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Controlla se ci sono state altre esecuzioni di LocalNonDocCommitExtractor e recupera i file
+      run: | 
+        if [ -z "$(find output/${{ vars.REPO }} -mindepth 1 -maxdepth 1)" ]; then
+           echo "Questa è la prima esecuzione."
+        else
+           echo "Ci sono state altre esecuzioni, recupero i file..."
+           mkdir -p developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+           mv output/${{ vars.REPO }}/commits.csv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        fi
+
+    - name: Run Python script
+      run: python3 developersInactivityAnalysis/CoreSelection/LocalNonDocCommitExtractor.py https://github.com/${{ vars.OWNER }}/${{ vars.REPO }}.git
+      timeout-minutes: 340
+      
+    - name: Salva i dati temporanei nella cartella di appoggio
+      if: ${{ failure() }} #si avvia solo se quello di prima è stato interrotto
+      run: |  
+        if [ -d "appoggio/${{ vars.REPO }}" ]; then
+          rm -r appoggio/${{ vars.REPO }}
+        else
+          echo "La directory 'appoggio/${{ vars.REPO }}' non esiste."
+        fi
+        mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }} appoggio
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add appoggio/${{ vars.REPO }}
+        git commit -m "Aggiunto linguist in ${{ vars.REPO }}"
+        git push
+
+
+    - name: Move CSV file to main repository
+      env:
+        REPO: ${{ env.REPO }}
+      run: | 
+        if [ -z "$(find output/${{ vars.REPO }} -mindepth 1 -maxdepth 1)" ]; then
+           mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }} output
+        else
+           rm -r output/${{ vars.REPO }}
+           mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }} output
+        fi
+        if [ -z "$(find appoggio/${{ vars.REPO }} -mindepth 1 -maxdepth 1)" ]; then
+           echo "oppoggio empty"
+        else
+            rm -r appoggio/${{ vars.REPO }}
+        fi    
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output/${{ vars.REPO }}
+        git commit -m "Terminato LocalNonDocCommitExtractor, aggiunto linguist in output"
+        git push

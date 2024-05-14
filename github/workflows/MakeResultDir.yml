@@ -1,0 +1,35 @@
+name: MakeResultDir
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  move_output:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Creazione della cartella con la data corrente
+      run: mkdir -p pastExecutions/$(date +'%Y-%m-%d')
+      
+    - name: Sposta i file dall'output alla cartella con la data corrente
+      run: mv output/* pastExecutions/$(date +'%Y-%m-%d')
+
+    - name: Svuota la cartella "output" e "appoggio"
+      run: |
+        rm -rf output/*
+        rm -rf appoggio/*
+      
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add pastExecutions
+        git add output
+        git add appoggio
+        git commit -m "End process"
+        git push

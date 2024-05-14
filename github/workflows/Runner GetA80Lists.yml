@@ -1,0 +1,87 @@
+name: Runner GetA80Lists
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner CommitExtractor"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Controlla se ci sono state altre esecuzioni di GetA80Lists e recupera i file
+      run: | 
+        mkdir -p developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        mkdir -p developersInactivityAnalysis/A80MOD_Results/${{ vars.REPO }}
+        mkdir -p developersInactivityAnalysis/A80API_Results/${{ vars.REPO }}
+        mkdir -p developersInactivityAnalysis/Organizations
+        if [ -f "output/A80_devs.csv" ]; then
+           echo "Ci sono state altre esecuzioni, recupero i file..."
+           mv output/A80_devs.csv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}         
+        else
+           echo "Questa è la prima esecuzione."
+        fi
+
+    - name: Run Python script GetA80Lists.py
+      env:
+         MY_SECRET: ${{ secrets.TOKEN }}
+      run: |
+        cp -r output/${{ vars.OWNER }} developersInactivityAnalysis/Organizations
+        cp output/unmasking_results.csv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        python3 developersInactivityAnalysis/CoreSelection/GetA80Lists.py ${{ vars.OWNER }}/${{ vars.REPO }} $MY_SECRET
+
+        
+    - name: Move CSV file to main repository
+      run: | 
+        if [ -f "output/A80_devs.csv" ]; then
+           rm output/A80_devs.csv
+
+           mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}/A80_devs.csv output
+           mv developersInactivityAnalysis/A80MOD_Results/${{ vars.REPO }}/A80mod_devs.csv output
+           mv developersInactivityAnalysis/A80API_Results/${{ vars.REPO }}/A80api_devs.csv output
+        else
+           mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}/A80_devs.csv output
+           mv developersInactivityAnalysis/A80MOD_Results/${{ vars.REPO }}/A80mod_devs.csv output
+           mv developersInactivityAnalysis/A80API_Results/${{ vars.REPO }}/A80api_devs.csv output
+        fi
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine GetA80Lists, salvataggio di A80_devs.csv in output"
+        git push

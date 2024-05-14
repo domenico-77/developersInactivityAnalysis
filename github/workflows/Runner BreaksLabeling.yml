@@ -1,0 +1,89 @@
+name: Runner BreaksLabeling
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner CodingTableBuilder"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Controlla se ci sono state altre esecuzioni di BreaksLabeling e recupera i file
+      run: | 
+        mkdir -p developersInactivityAnalysis/Organizations
+        mkdir -p developersInactivityAnalysis/logs
+        cp -r output/${{ vars.OWNER }} developersInactivityAnalysis/Organizations
+        
+        if [ -f "output/Breaks_Labeling_${{ vars.OWNER }}.log" ]; then
+           echo "Ci sono state altre esecuzioni, recupero i file..."
+           mv output/Breaks_Labeling_${{ vars.OWNER }}.log developersInactivityAnalysis/logs         
+        else
+           echo "Questa è la prima esecuzione."
+        fi
+
+    - name: Run Python script BreaksLabeling.py with tf param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksLabeling.py tf
+        
+    - name: Run Python script BreaksLabeling.py with a80 param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksLabeling.py a80
+        
+    - name: Run Python script BreaksLabeling.py with a80mod param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksLabeling.py a80mod
+        
+    - name: Run Python script BreaksLabeling.py with a80api param
+      run: python3 developersInactivityAnalysis/BreaksManager/BreaksLabeling.py a80api
+
+        
+    - name: Move CSV file to main repository
+      run: | 
+        rm -r output/${{ vars.OWNER }}
+        if [ -f "output/Breaks_Labeling_${{ vars.OWNER }}.log" ]; then
+           rm output/Breaks_Labeling_${{ vars.OWNER }}.log
+           mv developersInactivityAnalysis/logs/Breaks_Labeling_${{ vars.OWNER }}.log output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output
+        else
+           mv developersInactivityAnalysis/logs/Breaks_Labeling_${{ vars.OWNER }}.log output
+           mv developersInactivityAnalysis/Organizations/${{ vars.OWNER }} output
+        fi
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine BreaksLabeling, salvataggio di /${{ vars.OWNER }} e Breaks_Labeling_${{ vars.OWNER }}.log in output"
+        git push

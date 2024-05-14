@@ -1,0 +1,78 @@
+name: Runner UnmaskAliases
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner LoginIdentifier"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x   
+        
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+        cd developersInactivityAnalysis
+      
+      
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('developersInactivityAnalysis/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
+
+    - name: Install Python dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Controlla se ci sono state altre esecuzioni di UnmaskAliases e recupera i file
+      run: | 
+        mkdir -p developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        if [ -f "output/unmasking_results.csv" ]; then
+           echo "Ci sono state altre esecuzioni, recupero i file..."
+           mv output/unmasking_results.csv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        else
+            echo "Questa è la prima esecuzione."
+        fi
+
+    - name: Run Python script UnmaskAliases.py
+      env:
+         MY_SECRET: ${{ secrets.TOKEN }}
+      run: |
+        cp output/login_map.csv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}
+        python3 developersInactivityAnalysis/CoreSelection/UnmaskAliases.py ${{ vars.OWNER }}/${{ vars.REPO }} $MY_SECRET
+
+        
+    - name: Move CSV file to main repository
+      run: | 
+        if [ -f "output/unmasking_results.csv" ]; then
+           rm output/unmasking_results.csv
+           mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}/unmasking_results.csv output          
+        else
+           mv developersInactivityAnalysis/A80_Results/${{ vars.REPO }}/unmasking_results.csv output
+        fi
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Fine UnmaskAliases, salvataggio di unmasking_results.csv in output"
+        git push

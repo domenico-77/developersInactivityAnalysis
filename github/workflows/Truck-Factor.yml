@@ -1,0 +1,78 @@
+name: Truck-Factor
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Runner GetA80Lists"]
+    types:
+      - completed
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Checkout main repo
+      uses: actions/checkout@v3
+      
+    - name: Clone repository developersInactivityAnalysis
+      run: |
+        git clone -b tubvic https://github.com/domenico-77/developersInactivityAnalysis.git
+
+        
+    - name: install ruby
+      run: |
+       sudo apt install ruby
+       sudo apt-get update -y
+       sudo apt-get upgrade -y
+       sudo apt-get install -y ruby-rugged
+       sudo apt-get install -y ruby-dev
+       sudo apt-get install -y build-essential cmake pkg-config libicu-dev zlib1g-dev libcurl4-openssl-dev libssl-dev ruby-dev
+       gem install rugged github-linguist --user-install --no-document
+         
+    - name: Set up environment variable with repository path
+      run: |
+       echo 'export PATH="$HOME/.local/share/gem/ruby/3.0.0/bin:$PATH"' >> $GITHUB_ENV
+      
+
+    - name: Run .sh script
+      run: |
+         export TERM=xterm
+         git clone https://github.com/${{ vars.OWNER }}/${{ vars.REPO }}.git
+
+         mkdir -p developersInactivityAnalysis/Local_Repositories
+         mv ${{ vars.REPO }} developersInactivityAnalysis/Local_Repositories/
+
+         cd developersInactivityAnalysis
+         cd TruckFactor
+         
+         chmod +x commit_log_script.sh
+         ./commit_log_script.sh ../Local_Repositories/${{ vars.REPO }}
+         
+         chmod +x linguist_script.sh
+         ./linguist_script.sh ../Local_Repositories/${{ vars.REPO }}
+         
+         java -jar gittruckfactor.jar ../Local_Repositories/${{ vars.REPO }} ${{ vars.OWNER }}/${{ vars.REPO }} > ../Local_Repositories/${{ vars.REPO }}/TF_report.txt
+
+
+    - name: Move file to main repository
+      run: | 
+        mv developersInactivityAnalysis/Local_Repositories/${{ vars.REPO }}/TF_report.txt output
+        mv developersInactivityAnalysis/Local_Repositories/${{ vars.REPO }}/linguistfiles.log output
+        mv developersInactivityAnalysis/Local_Repositories/${{ vars.REPO }}/commitinfo.log output
+        mv developersInactivityAnalysis/Local_Repositories/${{ vars.REPO }}/commitfileinfo.log output
+        mv developersInactivityAnalysis/Local_Repositories/${{ vars.REPO }}/filelist.log output
+
+
+    - name: Commit changes
+      run: |        
+        git config --local user.name "domenico-77"
+        git config --local user.email "d.vicenti1@studenti.uniba.it"
+        git pull
+        git add output
+        git commit -m "Terminato Truck-Factor, aggiunto TF_report.txt in output"
+        git push
+        
+  
